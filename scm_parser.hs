@@ -111,6 +111,11 @@ parseExpr =
             x <- try parseList <|> parseDottedList
             char ')'
             return x
+    <|> do
+            char '['
+            x <- try parseList <|> parseDottedList
+            char ']'
+            return x
 
 readExpr :: String -> ThrowsError LispVal
 readExpr input = case parse parseExpr "lisp" input of
