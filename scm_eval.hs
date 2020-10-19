@@ -53,11 +53,25 @@ unpackNum (String n) = let parsed = reads n in
 unpackNum (List [n]) = unpackNum n
 unpackNum notANum    = throwError $ TypeMismatch "number" notANum
 
+unpackStr :: LispVal -> ThrowsError String
+unpackStr (String s)  = return s
+unpackStr (Number s)  = return $ show s
+unpackStr (Bool s)    = return $ show s
+unpackStr notAString  = throwError $ TypeMismatch "string" notAString
+
+unpackBool :: LispVal -> ThrowsError Bool
+unpackBool (Bool b) = return b
+unpackBool notABool     = throwError $ TypeMismatch "boolean" notABool
+
 boolBinop :: (LispVal -> ThrowsError a) -> (a -> a -> Bool) -> [LispVal] -> ThrowsError LispVal
-boolBinop unpacker op args = if length /= 2
+boolBinop unpacker op args = if length args /= 2
                              then throwError $ NumArgs 2 args
                              else do
                                  left  <- unpacker $ args !! 0
                                  right <- unpacker $ args !! 1
                                  return $ Bool $ left `op` right
+
+numBoolBinop  = boolBinop unpackNum
+strBoolBinop  = boolBinop unpackStr
+boolBoolBinop = boolBinop unpackBool
 --
